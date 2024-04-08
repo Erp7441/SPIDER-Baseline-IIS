@@ -1,0 +1,18 @@
+{
+  "version": "1.7.0",
+  "dataset": "Final_dataset",
+  "fold": 1,
+  "filters": 50,
+  "traversal_direction": "up",
+  "epochs": 100000,
+  "nthpatchempty": 3,
+  "complfrac": 0.98,
+  "grayvalue_augmentation": false,
+  "grayvalue_inversion": false,
+  "multitask": false,
+  "snapshotevery": 10,
+  "demoevery": 500,
+  "unet": false,
+  "only_vertebra": false,
+  "vertebra_and_discs": false
+}
