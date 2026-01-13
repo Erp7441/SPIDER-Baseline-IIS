@@ -635,6 +635,7 @@ class IterativeSegmentationNetworkDoubleMemoryState(IterativeSegmentationNetwork
                 images, masks, labels,
                 completenesses, weights,
                 channel)
+            # TODO:: Fix the return values here
         return self._to_numpy(loss), self._to_numpy(segmentation_error), self._to_numpy(
             classification_error), self._to_numpy(labeling_error), self._to_numpy(
             segmentation_error_vert), self._to_numpy(segmentation_error_disc), self._to_numpy(segmentation_error_SC)
