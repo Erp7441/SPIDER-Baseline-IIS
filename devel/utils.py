@@ -118,7 +118,25 @@ class LearningCurve:
 
 
 class Screenshot(ScreenshotCollage):
-    def __init__(self, captions, dynamic_window_level=False):
+    def __init__(self, captions=None, dynamic_window_level=False, n=None):
+        """Create a screenshot collage helper.
+
+        Accepts either an iterable of `captions` (one per generator) or an integer `n`
+        to create `n` generators with empty captions. Keeps `dynamic_window_level`
+        for backward compatibility with existing callers.
+        """
+        # Allow calling with positional `captions` as an int
+        if isinstance(captions, int):
+            captions = [''] * int(captions)
+
+        # If `n` is provided, override/create captions as n-empty captions
+        if n is not None:
+            captions = [''] * int(n)
+
+        # Default to a single empty caption when none provided
+        if captions is None:
+            captions = ['']
+
         lut = VertebraColors()
         wl = None if dynamic_window_level else (400, 50)
         generators = [
