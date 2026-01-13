@@ -70,6 +70,8 @@ class Module:
 
             if self.args.autocrop is not None:
                 m['autocrop'] = self.args.autocrop
+            else:
+                m['autocrop'] = [False, False]
 
             m['ignore_slices_top'] = 0
             m['ignore_slices_bottom'] = 0
