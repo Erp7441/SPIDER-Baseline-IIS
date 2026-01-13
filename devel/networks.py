@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.cuda.amp as amp
 import numpy as np
 
 from os import path, makedirs
@@ -309,7 +308,7 @@ class NeuralNetwork:
         self.dtype = np.dtype(dtype)
         self.network = network.to(device)
         self.optimizer = None
-        self.scaler = amp.GradScaler(enabled=mixed_precision)
+        self.scaler = torch.GradScaler(device=device, enabled=mixed_precision)
         self.mixed_precision = mixed_precision
 
         if device == 'cuda':
@@ -458,7 +457,7 @@ class IterativeSegmentationNetwork(SegmentationNetwork):
             memory_state, _ = self._infer_memory_state_from_mask(memory_state, label)
 
         # Pass image through the network
-        with torch.no_grad(), amp.autocast(enabled=self.mixed_precision):
+        with torch.no_grad(), torch.autocast(device_type=str(self.device), enabled=self.mixed_precision):
             segmentation, classification, labeling = self._forward([image], memory_state[None, :, :, :], deterministic=True, channel=channel)
             segmentation = segmentation[0, :, :, :]
 
@@ -476,7 +475,7 @@ class IterativeSegmentationNetwork(SegmentationNetwork):
         memory_state = self._from_numpy(inputs[1] > 0)[None, None, :, :, :]
 
         self.network.train(False)
-        with torch.no_grad(), amp.autocast(enabled=self.mixed_precision):
+        with torch.no_grad(), torch.autocast(device_type=str(self.device), enabled=self.mixed_precision):
             activation = self.network.nth_activation_map(n, image, memory_state)
 
         return self._to_numpy(torch.sum(activation[0, :, :, :, :], dim=0))
@@ -488,7 +487,7 @@ class IterativeSegmentationNetwork(SegmentationNetwork):
     def _loss(self, images, masks, labels, completenesses, weights, channel, step=False):
         memory_states, ground_truths = self._infer_memory_states_from_masks(masks, labels)
 
-        with amp.autocast(enabled=self.mixed_precision):
+        with torch.autocast(device_type=str(self.device), enabled=self.mixed_precision):
             # Forward pass
             pred_segm, pred_cmpl, pred_labl = self._forward(images, memory_states, channel=channel)
 
@@ -601,7 +600,7 @@ class IterativeSegmentationNetworkDoubleMemoryState(IterativeSegmentationNetwork
             memory_state_discs, _ = self._infer_memory_state_discs_from_mask(memory_state_discs, label)
 
         # Pass image through the network
-        with torch.no_grad(), amp.autocast(enabled=self.mixed_precision):
+        with torch.no_grad(), torch.autocast(device_type=str(self.device), enabled=self.mixed_precision):
             segmentation, classification, labeling = self._forward([image], memory_state[None, :, :, :],
                                                                    memory_state_discs[None, :, :, :],
                                                                    deterministic=True, channel=channel)
@@ -658,7 +657,7 @@ class IterativeSegmentationNetworkDoubleMemoryState(IterativeSegmentationNetwork
         memory_states, ground_truths = self._infer_memory_states_from_masks(masks, labels)
         memory_states_discs, _ = self._infer_memory_states_from_masks(masks, labels, discs=True)
 
-        with amp.autocast(enabled=self.mixed_precision):
+        with torch.autocast(device_type=str(self.device), enabled=self.mixed_precision):
             # Forward pass
             pred_segm, pred_cmpl, pred_labl = self._forward(images, memory_states, memory_states_discs, channel=channel)
 
